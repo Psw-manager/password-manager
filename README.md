@@ -32,8 +32,8 @@ docker-compose up
 
 ## Checking
 
-If everything goes properly you shoul be able to access this site:
+If everything goes properly you should be able to access this site:
 
 ```bash
-http://127.0.0.1:8000/api/
+http://127.0.0.1:8000/admin/
 ```
