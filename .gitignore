@@ -1,37 +1,72 @@
+# Python virtual environments
 venv/
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+env/
+ENV/
+.venv/
 
-# dependencies
-frontend/node_modules
-frontend/.pnp
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.env*.local
+*.env
+
+# Django-specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+db.sqlite3
+/media/
+staticfiles/
+local_settings.py
+
+# Testing and coverage
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/
+.cache/
+*.cover
+*.coverage
+.coverage.*
+
+# Migrations
+**/migrations/*.py
+**/migrations/*.pyc
+
+# Frontend dependencies
+frontend/node_modules/
+frontend/.pnp/
 frontend/.pnp.js
 frontend/.yarn/install-state.gz
 
-# testing
-/coverage
-
-# next.js
+# Next.js
 frontend/.next/
 frontend/out/
+frontend/build/
 
-# production
-frontend/build
-
-# misc
+# Miscellaneous
 .DS_Store
 *.pem
 
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
 
-# vercel
-.vercel
+# IDE settings
+.vscode/
+.idea/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Docker-related
+*.log
+docker-compose.override.yml
+.dockerignore
