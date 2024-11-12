@@ -1,5 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import { SessionProvider } from "@/components/SessionProvider";
+import { ThemeProvider } from "@/components/theme-provider"
+import { TopBar } from "@/components/TopBar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,7 +26,19 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SessionProvider>
+            <div className="flex flex-col h-screen">
+              <TopBar />
+              {children}
+            </div>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
