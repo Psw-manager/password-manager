@@ -64,7 +64,7 @@ export const TopBar = () => {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <Link
-              href="/"
+              href="/dashboard"
               className="flex items-center gap-2 text-lg font-semibold"
             >
               <TbCircleKeyFilled className="h-10 w-10" />
@@ -108,7 +108,7 @@ export const TopBar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+            //onClick={() => signOut({ callbackUrl: "/", redirect: true })}
             >
               Logout
             </DropdownMenuItem>

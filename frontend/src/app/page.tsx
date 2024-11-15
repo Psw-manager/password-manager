@@ -6,7 +6,7 @@ export default function Home() {
     <div className="flex w-full h-screen">
     <div className="hidden lg:flex flex-col h-full w-1/2 justify-center">
       <div className="flex flex-row space-x-6 pl-20 pr-10">
-        Tu cała robota i hope soon
+        Tutaj powinno być logowanie
     </div>
     </div>
     </div>
