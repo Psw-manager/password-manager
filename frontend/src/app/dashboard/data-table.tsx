@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <div className="flex items-center py-4 w-1/4">
         <Input
-          placeholder="Search passwords by website name..."
+          placeholder="Search passwords by website name..." //albo mozna też dodać do kogo nalezy hasło i zrobic wyszukiwanie po imionach
           value={
             (table.getColumn("website_name")?.getFilterValue() as string) ?? ""
           }
