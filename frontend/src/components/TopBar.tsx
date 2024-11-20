@@ -48,7 +48,7 @@ export const TopBar = () => {
           Generate Password
         </Link>
         <Link
-          href="/generate-totp"
+          href="/totp-generator"
           className="text-muted-foreground transition-colors hover:text-foreground text-xl whitespace-nowrap"
         >
           Generate TOTP
@@ -80,7 +80,7 @@ export const TopBar = () => {
               Generate Password
             </Link>
             <Link
-              href="/generate-totp"
+              href="/totp-generator"
               className="text-muted-foreground hover:text-foreground "
             >
               Generate TOTP
