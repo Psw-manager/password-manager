@@ -23,11 +23,6 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-#widok testowy
-class HelloWorldView(APIView):
-    def get(self, request):
-        return Response({"message": "Hello, world!"})
-
 #widok rejestracji użytkownika
 class RegisterView(APIView):
     def post(self, request):
@@ -43,11 +38,15 @@ class LoginView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
-        
-        if user:
-            return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if user.verify_password(password):
+            return Response({'message': 'Login successful!'})
         else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 #widok dodawania nowego hasła
 class AddPasswordView(APIView):
