@@ -19,25 +19,28 @@ import Link from "next/link";
 
 const FormSchema = z.object({
   email: z.string().min(2, {
-    message: "Email must be at least 2 characters.",
+    message: "Username must be at least 2 characters.",
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
   }),
+  password_confirmation: z.string().min(8, { message: "Password must be at least 8 characters long." }),
+}).refine(data => data.password === data.password_confirmation, {
+  path: ['password_confirmation'], 
+  message: "Passwords do not match.",
 });
 
-export default function Home() {
+export default function SignupPage() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       email: "",
       password: "",
+      password_confirmation: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof FormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values);
   }
 
@@ -74,14 +77,14 @@ export default function Home() {
           </div>
         </div>
         <div className="w-full flex flex-col items-center justify-center lg:w-1/2 dark:bg-[url('/background.jpg')] bg-[url('/background-lighter.jpg')]">
-          <div className="w-2/3 flex flex-col items-center justify-center bg-slate-500 rounded-3xl shadow-lg p-10 space-y-8">
+          <div className="w-2/3 flex flex-col items-center justify-center bg-slate-500 rounded-3xl shadow-lg p-5 space-y-8">
             <div className="flex flex-col items-center justify-center space-y-4 w-full">
               <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-green-500">
                 <TbCircleKeyFilled className="h-10 w-10" />
               </div>
 
               <h1 className="before:text-black dark:before:text-white font-extrabold text-3xl">
-                Log in!
+                Sign up!
               </h1>
 
               <Form {...form}>
@@ -116,17 +119,30 @@ export default function Home() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="password_confirmation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base">Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your password again..." type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <div className="flex justify-center p-2 mt-4">
                     <Button type="submit" className="w-2/5 text-base">
-                      Login
+                      Sign up
                     </Button>
                   </div>
                 </form>
               </Form>
               <p className="whitespace-nowrap text-base">
-                You don't have an account?{" "}
-                <Link href="/signup" className="underline hover:text-blue-800">
-                  Sign up.{" "}
+                You already have an account?{" "}
+                <Link href="/" className="underline hover:text-blue-800">
+                  Login.{" "}
                 </Link>
               </p>
             </div>
