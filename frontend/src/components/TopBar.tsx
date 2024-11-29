@@ -42,7 +42,7 @@ export const TopBar = () => {
           Dashboard
         </Link>
         <Link
-          href="/generate-password"
+          href="/password-generator"
           className="text-muted-foreground transition-colors hover:text-foreground text-xl whitespace-nowrap"
         >
           Generate Password
@@ -74,7 +74,7 @@ export const TopBar = () => {
               Dashboard
             </Link>
             <Link
-              href="/generate-password"
+              href="/password-generator"
               className="text-muted-foreground hover:text-foreground"
             >
               Generate Password
