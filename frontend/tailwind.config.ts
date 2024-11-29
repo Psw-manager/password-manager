@@ -1,10 +1,12 @@
+import type { Config } from "tailwindcss";
+
 const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{js,jsx}",
-    "./components/**/*.{js,jsx}",
-    "./app/**/*.{js,jsx}",
-    "./src/**/*.{js,jsx}",
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -58,7 +60,7 @@ const config = {
         },
       },
       height: {
-        nav: "12vh",
+        "nav": "12vh",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -82,6 +84,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+} satisfies Config;
 
-module.exports = config;
+export default config;
