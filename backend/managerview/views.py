@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .serializers import RegisterSerializer, PasswordSerializer  # Importowanie serializerów
+from .serializers import RegisterSerializer, PasswordSerializer  #importowanie serializerów
 from .models import User, Password
 from django.contrib.auth import authenticate
 import pyotp
+from django.contrib.auth.hashers import check_password
 
 #konfiguracja Swagger i Redoc
 schema_view = get_schema_view(
@@ -37,16 +38,19 @@ class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(email=email, password=password)
+
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if user.verify_password(password):
+        #używanie check_password
+        if check_password(password, user.password):
             return Response({'message': 'Login successful!'})
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 
 #widok dodawania nowego hasła
 class AddPasswordView(APIView):
