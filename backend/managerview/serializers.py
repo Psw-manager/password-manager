@@ -14,7 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
 
     def create(self, validated_data):
-        validated_data['hashed_password'] = make_password(validated_data.pop('password'))
+        validated_data['password'] = make_password(validated_data.pop('password')) #zahashowane haslo
         return super().create(validated_data)
 
 class PasswordSerializer(serializers.ModelSerializer):

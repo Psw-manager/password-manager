@@ -14,7 +14,7 @@ class User(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.totp_secret:
-            self.totp_secret = pyotp.random_base32()  #Generowanie klucza TOTP
+            self.totp_secret = pyotp.random_base32()  #generowanie klucza TOTP
         super().save(*args, **kwargs)
 
     def verify_password(self, raw_password):

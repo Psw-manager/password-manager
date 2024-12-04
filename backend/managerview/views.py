@@ -8,7 +8,13 @@ from .serializers import RegisterSerializer, PasswordSerializer  #importowanie s
 from .models import User, Password
 from django.contrib.auth import authenticate
 import pyotp
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password #wbudowana funkcja
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views import View
+
+def index(request):
+    return HttpResponse("Welcome to the Password Manager!")
 
 #konfiguracja Swagger i Redoc
 schema_view = get_schema_view(
