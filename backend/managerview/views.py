@@ -12,6 +12,8 @@ from django.contrib.auth.hashers import check_password #wbudowana funkcja
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views import View
+from .serializers import LoginSerializer
+from drf_yasg.utils import swagger_auto_schema
 
 def index(request):
     return HttpResponse("Welcome to the Password Manager!")
@@ -31,7 +33,16 @@ schema_view = get_schema_view(
 )
 
 #widok rejestracji użytkownika
+from drf_yasg.utils import swagger_auto_schema
+
 class RegisterView(APIView):
+    @swagger_auto_schema(
+        request_body=RegisterSerializer,
+        responses={
+            201: "User registered successfully",
+            400: "Validation error"
+        }
+    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -39,8 +50,43 @@ class RegisterView(APIView):
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+'''class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        '''
+
 #widok logowania użytkownika
 class LoginView(APIView):
+    @swagger_auto_schema(
+        request_body=LoginSerializer,
+        responses={
+            200: "Login successful",
+            401: "Invalid credentials"
+        }
+    )
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if check_password(password, user.password):
+            return Response({'message': 'Login successful!'})
+        else:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+'''class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -55,8 +101,7 @@ class LoginView(APIView):
             return Response({'message': 'Login successful!'})
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+            '''
 
 #widok dodawania nowego hasła
 class AddPasswordView(APIView):
