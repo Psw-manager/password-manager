@@ -8,6 +8,11 @@ from django.conf import settings
 SECRET_KEY = Fernet.generate_key()
 cipher_suite = Fernet(SECRET_KEY)
 
+#login
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
