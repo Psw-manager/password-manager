@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .serializers import RegisterSerializer, PasswordSerializer  #importowanie serializerów
+from .serializers import RegisterSerializer, PasswordSerializer, UserSerializer  #importowanie serializerów
 from .models import User, Password
 from django.contrib.auth import authenticate
 import pyotp
@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.views import View
 from .serializers import LoginSerializer
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import AllowAny
 
 def index(request):
     return HttpResponse("Welcome to the Password Manager!")
@@ -36,6 +37,7 @@ schema_view = get_schema_view(
 from drf_yasg.utils import swagger_auto_schema
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=RegisterSerializer,
         responses={
@@ -141,3 +143,18 @@ class ValidateTOTPView(APIView):
             return Response({"message": "TOTP code is valid"}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid TOTP code"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetAllUsersView(APIView):
+    permission_classes = [AllowAny]   # You can restrict this endpoint to admin users only
+
+    @swagger_auto_schema(
+        responses={200: UserSerializer(many=True)}
+    )
+
+    def get(self, request):
+        # Query all users
+        users = User.objects.all()
+        # Serialize the user data
+        serializer = UserSerializer(users, many=True)
+        # Return a response with the serialized data
+        return Response(serializer.data, status=status.HTTP_200_OK)

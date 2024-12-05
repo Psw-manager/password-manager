@@ -38,3 +38,8 @@ class PasswordSerializer(serializers.ModelSerializer):
         decrypted_password = cipher_suite.decrypt(instance.encrypted_password).decode()
         representation['password'] = decrypted_password
         return representation
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
