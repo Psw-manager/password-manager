@@ -8,6 +8,11 @@ from .views import (
     AddPasswordView, 
     ListPasswordsView,
     ValidateTOTPView,
+    GetPasswordsView,
+    GetPasswordByIdView,
+    DeletePasswordsView,
+    UpdatePasswordView,
+    AddPasswordView
 )
 
 urlpatterns = [
@@ -19,5 +24,8 @@ urlpatterns = [
     path('password/add/', AddPasswordView.as_view(), name='add-password'),
     path('passwords/', ListPasswordsView.as_view(), name='list-passwords'),
     path('validate-totp/', ValidateTOTPView.as_view(), name='validate-totp'),
-     path('users/', GetAllUsersView.as_view(), name='get_all_users'), 
+    path('users/', GetAllUsersView.as_view(), name='get_all_users'),
+    path('password/<int:password_id>/', GetPasswordByIdView.as_view(), name='get-password-by-id'),
+    path('passwords/delete/', DeletePasswordsView.as_view(), name='delete-passwords'),
+    path('password/<int:password_id>/update/', UpdatePasswordView.as_view(), name='update-password'),
 ]

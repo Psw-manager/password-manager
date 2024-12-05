@@ -8,7 +8,6 @@ from django.conf import settings
 SECRET_KEY = Fernet.generate_key()
 cipher_suite = Fernet(SECRET_KEY)
 
-#login
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -38,6 +37,13 @@ class PasswordSerializer(serializers.ModelSerializer):
         decrypted_password = cipher_suite.decrypt(instance.encrypted_password).decode()
         representation['password'] = decrypted_password
         return representation
+    
+    def update(self, instance, validated_data):
+        password = validated_data.get('password', None)
+        if password:
+            encrypted_password = cipher_suite.encrypt(password.encode())
+            validated_data['encrypted_password'] = encrypted_password
+        return super().update(instance, validated_data)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
