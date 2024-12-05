@@ -16,6 +16,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
+import { toast } from "sonner";
+import axios from "axios";
+import { useState } from "react";
 
 const FormSchema = z.object({
   email: z.string().min(2, {
@@ -27,6 +30,9 @@ const FormSchema = z.object({
 });
 
 export default function Home() {
+
+  const [errorMessage, setErrorMessage] = useState("");
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -35,10 +41,31 @@ export default function Home() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof FormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    setErrorMessage(""); 
+  
+    try {
+      const { email, password } = values;  
+      const response = await axios.post('http://localhost:8000/api/login/', { email, password });
+  
+      console.log(response.data);
+      toast("Login has been successful!", {
+        action: {
+          label: "X",
+          onClick: () => console.log("exit"),
+        },
+      })
+      
+      //router.push('/login');  
+
+  
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || 'An error occurred');
+      console.error(error);
+    } finally {
+      form.reset();
+    }
+   
   }
 
   return (

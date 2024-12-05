@@ -16,7 +16,7 @@ class LoginSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['email', 'password']
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data.pop('password')) #zahashowane haslo
@@ -42,4 +42,4 @@ class PasswordSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'email', 'password']

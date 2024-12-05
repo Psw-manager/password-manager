@@ -16,6 +16,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
+import axios from "axios"; 
+import { useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/router";
+
 
 const FormSchema = z.object({
   email: z.string().min(2, {
@@ -31,6 +36,11 @@ const FormSchema = z.object({
 });
 
 export default function SignupPage() {
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  //const router = useRouter();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -40,9 +50,34 @@ export default function SignupPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values);
-  }
+  
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    setLoading(true);
+    setErrorMessage(""); 
+  
+    try {
+      const { email, password } = values;  
+      const response = await axios.post('http://localhost:8000/api/register/', { email, password });
+  
+      console.log(response.data);
+      toast("Registration has been successful!", {
+        action: {
+          label: "X",
+          onClick: () => console.log("exit"),
+        },
+      })
+      form.reset();
+      //router.push('/login');  
+
+  
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || 'An error occurred');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <>
@@ -133,12 +168,13 @@ export default function SignupPage() {
                     )}
                   />
                   <div className="flex justify-center p-2 mt-4">
-                    <Button type="submit" className="w-2/5 text-base">
-                      Sign up
+                    <Button type="submit" className="w-2/5 text-base" disabled={loading}>
+                      {loading ? 'Signing up...' : 'Sign up'}
                     </Button>
                   </div>
                 </form>
               </Form>
+              {errorMessage && <div className="text-red-500 text-center">{errorMessage}</div>}
               <p className="whitespace-nowrap text-base">
                 You already have an account?{" "}
                 <Link href="/" className="underline hover:text-blue-800">

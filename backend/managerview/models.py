@@ -3,14 +3,11 @@ import pyotp
 from django.contrib.auth.hashers import check_password
 
 class User(models.Model):
-    username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
 
-    def __str__(self):
-        return self.username
 
     def save(self, *args, **kwargs):
         if not self.totp_secret:
@@ -34,5 +31,4 @@ class Password(models.Model):
             models.Index(fields=['user']),
         ]
 
-    def __str__(self):
-        return f"{self.site_name} for {self.user.username}"
+    
