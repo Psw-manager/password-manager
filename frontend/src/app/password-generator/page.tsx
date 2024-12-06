@@ -16,14 +16,52 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GrRefresh } from "react-icons/gr";
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function PasswordGeneratorPage() {
-  const [sliderValue, setSliderValue] = useState<number>(0);
+  const [sliderValue, setSliderValue] = useState<number>(12);
+  const [password, setPassword] = useState<string>("");
+  const [useUppercase, setUseUppercase] = useState<boolean>(true);
+  const [useLowercase, setUseLowercase] = useState<boolean>(true);
+  const [useNumbers, setUseNumbers] = useState<boolean>(true);
+  const [useSymbols, setUseSymbols] = useState<boolean>(false);
 
   const handleValueChange = (value: number[]) => {
     setSliderValue(value[0]);
   };
+
+  const generatePassword = () => {
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
+
+    let charset = "";
+
+    if (useUppercase) charset += uppercase;
+    if (useLowercase) charset += lowercase;
+    if (useNumbers) charset += numbers;
+    if (useSymbols) charset += symbols;
+
+    if (charset.length === 0) {
+      toast.error("Please select at least one character set.");
+      return;
+    }
+
+    const randomValues = new Uint32Array(sliderValue);
+    window.crypto.getRandomValues(randomValues);
+
+    let newPassword = "";
+    for (let i = 0; i < sliderValue; i++) {
+      newPassword += charset[randomValues[i] % charset.length];
+    }
+
+    setPassword(newPassword);
+  };
+
+  useEffect(() => {
+    generatePassword(); 
+  }, []);
 
   return (
     <>
@@ -57,28 +95,39 @@ export default function PasswordGeneratorPage() {
                 <div className="relative w-4/5 h-2/3 mt-2">
                   <Input
                     id="password"
-                    className="text-lg p-4 w-full pr-10 h-full"
+                    value={password}
+                    className="text-5xl font-bold p-4 w-full pr-10 h-full"
+                    readOnly
                   />
 
                   <GrRefresh
                     type="button"
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-2xl cursor-pointer"
-                    onClick={() => console.log("Retry clicked")}
+                    onClick={generatePassword}
                   />
                 </div>
                 <Button
                   variant="default"
-                  onClick={() =>
-                    toast(
-                      "Generated password has been copied to your clipboard!",
-                      {
-                        action: {
-                          label: "X",
-                          onClick: () => console.log("exit"),
-                        },
-                      }
-                    )
-                  }
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigator.clipboard
+                      .writeText(password)
+                      .then(() => {
+                        toast(
+                          "Password has been copied to your clipboard!",
+                          {
+                            action: {
+                              label: "X",
+                              onClick: () => console.log("exit"),
+                            },
+                          }
+                        );
+                      })
+                      .catch((err) => {
+                        toast.error("Failed to copy password to clipboard");
+                        console.error("Clipboard copy failed: ", err);
+                      });
+                  }}
                   className="text-xl px-7 py-7"
                 >
                   Copy
@@ -113,7 +162,12 @@ export default function PasswordGeneratorPage() {
                 </Label>
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="ABC" className="w-6 h-6" defaultChecked />
+                    <Checkbox
+                      id="ABC"
+                      className="w-6 h-6"
+                      onCheckedChange={() => setUseUppercase(!useUppercase)}
+                      defaultChecked
+                    />
                     <label
                       htmlFor="ABC"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -123,7 +177,12 @@ export default function PasswordGeneratorPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="abc" className="w-6 h-6" defaultChecked />
+                    <Checkbox
+                      id="abc"
+                      className="w-6 h-6"
+                      onCheckedChange={() => setUseLowercase(!useLowercase)}
+                      defaultChecked
+                    />
                     <label
                       htmlFor="abc"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -132,7 +191,12 @@ export default function PasswordGeneratorPage() {
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="123" className="w-6 h-6" defaultChecked />
+                    <Checkbox
+                      id="123"
+                      className="w-6 h-6"
+                      onCheckedChange={() => setUseNumbers(!useNumbers)}
+                      defaultChecked
+                    />
                     <label
                       htmlFor="123"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -142,7 +206,11 @@ export default function PasswordGeneratorPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="#$%" className="w-6 h-6" />
+                    <Checkbox
+                      id="#$%"
+                      className="w-6 h-6"
+                      onCheckedChange={() => setUseSymbols(!useSymbols)}
+                    />
                     <label
                       htmlFor="#$%"
                       className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

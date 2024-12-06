@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    webpackDevMiddleware: config => {
-        config.watchOptions = {
-          poll: 1000,
-          aggregateTimeout: 300,
-        }
-        return config
-      },
+  webpack(config, { isServer }) {
+    // Only modify client-side Webpack configuration
+    if (!isServer) {
+      config.watchOptions = {
+        poll: 1000,  // Poll every 1 second
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

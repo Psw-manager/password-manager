@@ -21,8 +21,8 @@ import { useTheme } from "next-themes";
 export const TopBar = () => {
   const { theme, setTheme } = useTheme();
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+  const toggleTheme = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
   };
 
   return (
@@ -92,7 +92,7 @@ export const TopBar = () => {
         <div className="flex items-center space-x-2 p-4">
           <Switch
             id="dark-mode"
-            onCheckedChange={toggleTheme}
+            onCheckedChange={(checked) => toggleTheme(checked)}
             checked={theme === "dark"}
           />
         </div>

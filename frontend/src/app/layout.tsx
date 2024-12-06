@@ -1,9 +1,12 @@
+
 import localFont from "next/font/local";
 import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import { TopBar } from "@/components/TopBar";
 import { Toaster } from "@/components/ui/sonner";
+import { useEffect, useState } from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,16 +29,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
+        <NextThemesProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
+          defaultTheme="system"
+          enableSystem={true}
+          disableTransitionOnChange={false}
         >
           <SessionProvider>
             <div className="flex flex-col h-screen">
@@ -43,7 +47,7 @@ export default function RootLayout({
               {children}
             </div>
           </SessionProvider>
-        </ThemeProvider>
+        </NextThemesProvider>
         <Toaster />
       </body>
     </html>

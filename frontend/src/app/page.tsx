@@ -18,7 +18,9 @@ import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const FormSchema = z.object({
   email: z.string().min(2, {
@@ -30,8 +32,9 @@ const FormSchema = z.object({
 });
 
 export default function Home() {
-
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoginSuccessful, setIsLoginSuccessful] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -42,31 +45,34 @@ export default function Home() {
   });
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    setErrorMessage(""); 
-  
-    try {
-      const { email, password } = values;  
-      const response = await axios.post('http://localhost:8000/api/login/', { email, password });
-  
-      console.log(response.data);
-      toast("Login has been successful!", {
-        action: {
-          label: "X",
-          onClick: () => console.log("exit"),
-        },
-      })
-      
-      //router.push('/login');  
-
-  
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || 'An error occurred');
-      console.error(error);
-    } finally {
-      form.reset();
+    setErrorMessage("");
+    console.log(values);
+    // Call next-auth's signIn method to authenticate the user
+    const response = await signIn("credentials", {
+      redirect: false, // Prevent automatic redirect
+      email: values.email,
+      password: values.password,
+    });
+    //console.log(response);
+    if (response?.error) {
+      // Handle login error
+      setErrorMessage(response.error);
+      toast.error("Login failed. Please try again.");
+    } else {
+      // Successful login
+      toast.success("Login successful!");
+      setIsLoginSuccessful(true); // Track login success
     }
-   
-  }
+
+    form.reset(); // Reset the form after submit
+  };
+
+  // Redirect to the dashboard after successful login
+  useEffect(() => {
+    if (isLoginSuccessful) {
+      router.push("/dashboard"); // Safe to navigate here after login
+    }
+  }, [isLoginSuccessful, router]);
 
   return (
     <>
@@ -137,7 +143,11 @@ export default function Home() {
                       <FormItem>
                         <FormLabel className="text-base">Password</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your password..." type="password" {...field} />
+                          <Input
+                            placeholder="Enter your password..."
+                            type="password"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

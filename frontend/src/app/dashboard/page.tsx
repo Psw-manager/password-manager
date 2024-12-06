@@ -1,5 +1,9 @@
+"use client";
+import { useSession } from "next-auth/react";
 import { Password, columns } from "./columns"
 import { DataTable } from "./data-table"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 async function getData(): Promise<Password[]> {
   // Fetch data from your API here.
@@ -104,8 +108,23 @@ async function getData(): Promise<Password[]> {
   
 }
 
-export default async function DemoPage() {
-  const data = await getData()
+export default function DemoPage() {
+  const { data: session, status } = useSession();  // Using useSession to check session
+  const [data, setData] = useState<Password[]>([]); 
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "loading") return; 
+    
+    if (!session) {
+  
+      router.push("/"); 
+    }
+  }, [session, status, router]); 
+
+  if (status === "loading") {
+    return <p>Loading...</p>; 
+  }
 
   return (
     <div className="container mx-auto py-10">

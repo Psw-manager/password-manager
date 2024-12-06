@@ -15,6 +15,7 @@ from django.views import View
 from .serializers import LoginSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 
 def index(request):
     return HttpResponse("Welcome to the Password Manager!")
@@ -84,7 +85,8 @@ class LoginView(APIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
         if check_password(password, user.password):
-            return Response({'message': 'Login successful!'})
+            refresh = RefreshToken.for_user(user)
+            return Response({"access_token": str(refresh.access_token), "refresh_token": str(refresh)})
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
