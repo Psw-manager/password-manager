@@ -4,11 +4,16 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .serializers import RegisterSerializer, PasswordSerializer, UserSerializer  #importowanie serializerów
+from .serializers import (
+    LoginResponseSerializer,
+    RegisterSerializer,
+    PasswordSerializer,
+    UserSerializer,
+)  # importowanie serializerów
 from .models import User, Password
 from django.contrib.auth import authenticate
 import pyotp
-from django.contrib.auth.hashers import check_password #wbudowana funkcja
+from django.contrib.auth.hashers import check_password  # wbudowana funkcja
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views import View
@@ -17,14 +22,16 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 def index(request):
     return HttpResponse("Welcome to the Password Manager!")
 
-#konfiguracja Swagger i Redoc
+
+# konfiguracja Swagger i Redoc
 schema_view = get_schema_view(
     openapi.Info(
         title="My API",
-        default_version='v1',
+        default_version="v1",
         description="API documentation for my project",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@example.com"),
@@ -34,92 +41,86 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-#widok rejestracji użytkownika
+# widok rejestracji użytkownika
 from drf_yasg.utils import swagger_auto_schema
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+
     @swagger_auto_schema(
         request_body=RegisterSerializer,
-        responses={
-            201: "User registered successfully",
-            400: "Validation error"
-        }
+        responses={201: "User registered successfully", 400: "Validation error"},
     )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "User registered successfully!"},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-'''class RegisterView(APIView):
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        '''
-
-#widok logowania użytkownika
+# widok logowania użytkownika
 class LoginView(APIView):
     @swagger_auto_schema(
         request_body=LoginSerializer,
-        responses={
-            200: "Login successful",
-            401: "Invalid credentials"
-        }
+        responses={200: LoginResponseSerializer, 401: "Invalid credentials"},
     )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
+        print(f"Email: {email}, Password: {password}")
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         if check_password(password, user.password):
             refresh = RefreshToken.for_user(user)
-            return Response({"access_token": str(refresh.access_token), "refresh_token": str(refresh)})
+            print(f"User email: {user.email}") 
+            return Response(
+                {
+                    "email": str(user.email),
+                    "access_token": str(refresh.access_token),
+                    "refresh_token": str(refresh),
+                }
+            )
         else:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
-'''class LoginView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        #używanie check_password
-        if check_password(password, user.password):
-            return Response({'message': 'Login successful!'})
-        else:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-            '''
 
-#widok dodawania nowego hasła
+# widok dodawania nowego hasła
 class AddPasswordView(APIView):
     def post(self, request):
         serializer = PasswordSerializer(data=request.data)
-        serializer.context['user'] = request.user
+        serializer.context["user"] = request.user
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response({"message": "Password saved successfully!"}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "Password saved successfully!"},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#widok odczytania zapisanych haseł
+
+# widok odczytania zapisanych haseł
 class ListPasswordsView(APIView):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         passwords = Password.objects.filter(user=request.user)
         serializer = PasswordSerializer(passwords, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -127,32 +128,41 @@ class ListPasswordsView(APIView):
 
 class ValidateTOTPView(APIView):
     def post(self, request):
-        email = request.data.get('email')
-        submitted_code = request.data.get('code')
+        email = request.data.get("email")
+        submitted_code = request.data.get("code")
 
         if not email or not submitted_code:
-            return Response({"error": "Email and code are required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email and code are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         totp = pyotp.TOTP(user.totp_secret)
         is_valid = totp.verify(submitted_code)
 
         if is_valid:
-            return Response({"message": "TOTP code is valid"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "TOTP code is valid"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"error": "Invalid TOTP code"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid TOTP code"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 class GetAllUsersView(APIView):
-    permission_classes = [AllowAny]   # You can restrict this endpoint to admin users only
+    permission_classes = [
+        AllowAny
+    ]  # You can restrict this endpoint to admin users only
 
-    @swagger_auto_schema(
-        responses={200: UserSerializer(many=True)}
-    )
-
+    @swagger_auto_schema(responses={200: UserSerializer(many=True)})
     def get(self, request):
         # Query all users
         users = User.objects.all()

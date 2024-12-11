@@ -108,23 +108,22 @@ async function getData(): Promise<Password[]> {
   
 }
 
-export default function DemoPage() {
-  const { data: session, status } = useSession();  // Using useSession to check session
-  const [data, setData] = useState<Password[]>([]); 
-  const router = useRouter();
+export default async function DemoPage() {
 
-  useEffect(() => {
-    if (status === "loading") return; 
+  const data = await getData();
+
+  // useEffect(() => {
+  //   if (status === "loading") return; 
     
-    if (!session) {
+  //   if (!session) {
   
-      router.push("/"); 
-    }
-  }, [session, status, router]); 
+  //     router.push("/"); 
+  //   }
+  // }, [session, status, router]); 
 
-  if (status === "loading") {
-    return <p>Loading...</p>; 
-  }
+  // if (status === "loading") {
+  //   return <p>Loading...</p>; 
+  // }
 
   return (
     <div className="container mx-auto py-10">

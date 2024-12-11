@@ -13,6 +13,11 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
+class LoginResponseSerializer(serializers.Serializer): 
+    email = serializers.EmailField() 
+    access_token = serializers.CharField() 
+    refresh_token = serializers.CharField()
+
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -23,9 +28,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class PasswordSerializer(serializers.ModelSerializer):
+    # Make sure all relevant fields are serialized
     class Meta:
         model = Password
-        fields = ['site_name', 'site_url', 'password']
+        fields = ['id', 'site_name', 'site_url', 'encrypted_password', 'created_at', 'updated_at']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -34,9 +40,10 @@ class PasswordSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def to_representation(self, instance):
+        # Decrypt the password before returning it in the response
         representation = super().to_representation(instance)
-        decrypted_password = cipher_suite.decrypt(instance.encrypted_password).decode()
-        representation['password'] = decrypted_password
+        decrypted_password = cipher_suite.decrypt(instance.encrypted_password.encode()).decode()
+        representation['password'] = decrypted_password  # Add the decrypted password to the response
         return representation
 
 class UserSerializer(serializers.ModelSerializer):

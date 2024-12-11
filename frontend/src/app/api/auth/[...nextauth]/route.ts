@@ -21,9 +21,10 @@ const handler = NextAuth({
             password: credentials?.password,
           }),
         });
-      
+
         const user = await res.json();
-      
+        console.log('User from API:', user);
+
         if (res.ok && user.access_token) {
           return { ...user, accessToken: user.access_token };  // Return the user object with access token
         } else {
@@ -36,17 +37,21 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken as string;  // Save the access token
+        token.email = user.email;  // Save the email
+        console.log("JWT object:", token);
       }
       return token;
     },
-    
+
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;  // Attach the access token to the session
+      session.user = { ...session.user, email: token.email };  // Attach the email to the session user object
+      console.log("Session object:", session);
       return session;
     },
   },
   pages: {
-    signIn: "/signup",  // Using JWT as session strategy
+    signIn: "/",  // Using JWT as session strategy
   },
   secret: process.env.NEXTAUTH_SECRET,  // Ensure you have a secret set for JWT encryption
 });

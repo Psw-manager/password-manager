@@ -20,15 +20,13 @@ class User(models.Model):
 
 class Password(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='passwords')
-    site_name = models.CharField(max_length=255)
-    site_url = models.URLField(blank=True, null=True)
+    site_name = models.TextField(max_length=255)
+    site_url = models.TextField(blank=True, null=True)
     encrypted_password = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.TextField()
+    updated_at = models.TextField()
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['user']),
-        ]
+    def __str__(self):
+        return f"Password for {self.user.email}"
 
     

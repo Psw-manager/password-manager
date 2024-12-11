@@ -17,9 +17,20 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { TbCircleKeyFilled } from "react-icons/tb";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "next-themes";
+import { signOut, useSession } from "next-auth/react";
 
 export const TopBar = () => {
   const { theme, setTheme } = useTheme();
+  const { data: session, status } = useSession();
+  const userName = session?.user?.email;
+
+  if (!session) {
+    return null;
+  }
+
+  if (session) {
+    console.log("Authenticated user:", session.user);
+  }
 
   const toggleTheme = (checked: boolean) => {
     setTheme(checked ? "dark" : "light");
@@ -99,16 +110,17 @@ export const TopBar = () => {
         <form className="ml-auto flex-1 sm:flex-initial">
           <div className="relative"></div>
         </form>
-        <DropdownMenu>
+        <DropdownMenu >
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
               <FaRegUser className="h-5 w-5" />
-              {/* <span >{userName}</span> */}
+               <span >{userName}</span> 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-            //onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+            onClick={() => {  console.log("Logged out");
+              signOut({ callbackUrl: "/", redirect: true })}}
             >
               Logout
             </DropdownMenuItem>

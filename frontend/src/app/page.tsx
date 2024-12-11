@@ -46,33 +46,26 @@ export default function Home() {
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     setErrorMessage("");
-    console.log(values);
-    // Call next-auth's signIn method to authenticate the user
+
     const response = await signIn("credentials", {
-      redirect: false, // Prevent automatic redirect
+      redirect: true,
       email: values.email,
       password: values.password,
+      callbackUrl: "/dashboard",
     });
-    //console.log(response);
+
     if (response?.error) {
-      // Handle login error
       setErrorMessage(response.error);
       toast.error("Login failed. Please try again.");
     } else {
-      // Successful login
+
       toast.success("Login successful!");
-      setIsLoginSuccessful(true); // Track login success
+      setIsLoginSuccessful(true); 
     }
 
-    form.reset(); // Reset the form after submit
+    form.reset(); 
   };
 
-  // Redirect to the dashboard after successful login
-  useEffect(() => {
-    if (isLoginSuccessful) {
-      router.push("/dashboard"); // Safe to navigate here after login
-    }
-  }, [isLoginSuccessful, router]);
 
   return (
     <>
