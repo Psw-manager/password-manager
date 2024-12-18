@@ -1,4 +1,4 @@
-// pages/api/auth/[...nextauth].ts
+
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -17,18 +17,17 @@ const handler = NextAuth({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: credentials?.email,  // Ensure you're sending the correct key (email)
+            email: credentials?.email,  
             password: credentials?.password,
           }),
         });
 
         const user = await res.json();
-        console.log('User from API:', user);
 
         if (res.ok && user.access_token) {
-          return { ...user, accessToken: user.access_token };  // Return the user object with access token
+          return { ...user, accessToken: user.access_token, refreshToken: user.refresh_token };  
         } else {
-          return null;  // Authorization failed, return null
+          return null;  
         }
       }
     }),
@@ -36,24 +35,25 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.accessToken as string;  // Save the access token
-        token.email = user.email;  // Save the email
-        console.log("JWT object:", token);
+        token.accessToken = user.accessToken as string; 
+        token.refreshToken = user.refreshToken as string; 
+        token.email = user.email;  
+    
       }
       return token;
     },
 
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;  // Attach the access token to the session
-      session.user = { ...session.user, email: token.email };  // Attach the email to the session user object
-      console.log("Session object:", session);
+      session.accessToken = token.accessToken as string; 
+      session.refreshToken = token.refreshToken as string;  
+      session.user = { ...session.user, email: token.email };  
       return session;
     },
   },
   pages: {
-    signIn: "/",  // Using JWT as session strategy
+    signIn: "/", 
   },
-  secret: process.env.NEXTAUTH_SECRET,  // Ensure you have a secret set for JWT encryption
+  secret: process.env.NEXTAUTH_SECRET,  
 });
 
 export { handler as GET, handler as POST };

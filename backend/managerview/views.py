@@ -21,6 +21,14 @@ from .serializers import LoginSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenRefreshView
+import jwt
+from jwt.exceptions import ExpiredSignatureError, DecodeError
+
+class CustomTokenRefreshView(TokenRefreshView):
+    permissions_classes = [AllowAny]
+    pass
 
 
 def index(request):
@@ -65,6 +73,7 @@ class RegisterView(APIView):
 
 # widok logowania użytkownika
 class LoginView(APIView):
+    permissions_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=LoginSerializer,
         responses={200: LoginResponseSerializer, 401: "Invalid credentials"},
@@ -117,13 +126,30 @@ class AddPasswordView(APIView):
 
 
 # widok odczytania zapisanych haseł
+
 class ListPasswordsView(APIView):
+
     def get(self, request):
-        if not request.user.is_authenticated:
-            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-        passwords = Password.objects.filter(user=request.user)
+        # Retrieve email from query parameters
+        email_from_query = request.query_params.get('email')
+
+        # Check if the email is provided in the query parameters
+        if not email_from_query:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Find the user with the given email
+            user = User.objects.get(email=email_from_query)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get the passwords associated with the found user
+        passwords = Password.objects.filter(user=user)
         serializer = PasswordSerializer(passwords, many=True)
+
+        # Return the passwords as a JSON response
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class ValidateTOTPView(APIView):
@@ -158,9 +184,7 @@ class ValidateTOTPView(APIView):
 
 
 class GetAllUsersView(APIView):
-    permission_classes = [
-        AllowAny
-    ]  # You can restrict this endpoint to admin users only
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(responses={200: UserSerializer(many=True)})
     def get(self, request):

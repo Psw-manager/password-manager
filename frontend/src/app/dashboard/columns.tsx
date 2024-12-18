@@ -18,8 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PasswordDetails } from "@/components/PasswordDetails";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+
 export type Password = {
   password_id: string;
   website_name: string;
