@@ -17,9 +17,20 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { TbCircleKeyFilled } from "react-icons/tb";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "next-themes";
+import { signOut, useSession } from "next-auth/react";
 
 export const TopBar = () => {
   const { theme, setTheme } = useTheme();
+  const { data: session, status } = useSession();
+  const userName = session?.user?.email;
+
+  if (!session) {
+    return null;
+  }
+
+  if (session) {
+    console.log("Authenticated user:", session.user);
+  }
 
   const toggleTheme = (checked: boolean) => {
     setTheme(checked ? "dark" : "light");
@@ -88,7 +99,8 @@ export const TopBar = () => {
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+      <div className="flex w-full items-center justify-between gap-2 md:ml-auto md:gap-2 lg:gap-2">
+        {/* Left: Dark Mode Switch */}
         <div className="flex items-center space-x-2 p-4">
           <Switch
             id="dark-mode"
@@ -96,19 +108,23 @@ export const TopBar = () => {
             checked={theme === "dark"}
           />
         </div>
-        <form className="ml-auto flex-1 sm:flex-initial">
-          <div className="relative"></div>
-        </form>
+
+        {/* Right: Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon" className="rounded-full">
-              <FaRegUser className="h-5 w-5" />
-              {/* <span >{userName}</span> */}
+            <Button variant="secondary" className="m-2 flex items-center">
+              <span className="rounded-full py-2 px-2 flex items-center">
+                {userName}
+                <FaRegUser className="h-5 w-5 ml-4" />
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-            //onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+              onClick={() => {
+                console.log("Logged out");
+                signOut({ callbackUrl: "/", redirect: true });
+              }}
             >
               Logout
             </DropdownMenuItem>

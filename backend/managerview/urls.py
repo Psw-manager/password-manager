@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import (
+    CustomTokenRefreshView,
     GetAllUsersView,
     schema_view, 
     RegisterView, 
@@ -20,4 +21,6 @@ urlpatterns = [
     path('passwords/', ListPasswordsView.as_view(), name='list-passwords'),
     path('validate-totp/', ValidateTOTPView.as_view(), name='validate-totp'),
      path('users/', GetAllUsersView.as_view(), name='get_all_users'), 
+     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+     
 ]
