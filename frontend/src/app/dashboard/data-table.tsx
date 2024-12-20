@@ -101,10 +101,10 @@ export function DataTable<TData, TValue>({
         <Input
           placeholder="Search passwords by website name..." 
           value={
-            (table.getColumn("website_name")?.getFilterValue() as string) ?? ""
+            (table.getColumn("site_name")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("website_name")?.setFilterValue(event.target.value)
+            table.getColumn("site_name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({
                 Add new password
               </Button>
             </DialogTrigger>
-            <PasswordDetails title="Add new password" button_exit="Add" />
+            <PasswordDetails title="Add new password" button_exit="Add" isUpdateMode={false} />
           </Dialog>
           <AlertDialog>
             <AlertDialogTrigger asChild>

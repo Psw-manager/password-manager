@@ -20,8 +20,8 @@ import { PasswordDetails } from "@/components/PasswordDetails";
 
 
 export type Password = {
-  password_id: string;
-  website_name: string;
+  id: string;
+  site_name: string;
   username: string;
   category: string;
 };
@@ -52,7 +52,7 @@ export const columns: ColumnDef<Password>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "website_name",
+    accessorKey: "site_name",
     header: "Website Name",
   },
   {
@@ -76,7 +76,7 @@ export const columns: ColumnDef<Password>[] = [
               <MoreHorizontal />
             </Button>
           </DialogTrigger>
-          <PasswordDetails title="Password details" button_exit="Save changes"/>
+          <PasswordDetails title="Password details" button_exit="Save changes" isUpdateMode={true}/>
         </Dialog>
       );
     },

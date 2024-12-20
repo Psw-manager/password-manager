@@ -17,14 +17,34 @@ class User(models.Model):
     def verify_password(self, raw_password):
         #Weryfikacja hasła
         return check_password(raw_password, self.password)
+    
+class Category(models.TextChoices):
+        SOCIAL_MEDIA = 'Social Media', 'Social Media'
+        EMAIL = 'Email', 'Email'
+        BANKING = 'Banking', 'Banking'
+        OTHER = 'Other', 'Other' 
 
 class Password(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='passwords')
-    site_name = models.TextField(max_length=255)
-    site_url = models.TextField(blank=True, null=True)
-    encrypted_password = models.TextField()
-    created_at = models.TextField()
-    updated_at = models.TextField()
+    site_name = models.CharField(max_length=255)
+    site_url = models.CharField(max_length=255)
+    username = models.TextField(null=False, blank=False)
+    password = models.TextField(null=False, blank=False)
+    created_at = models.TextField( null=True, blank=True)
+    updated_at = models.TextField(null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.OTHER,
+    )
+    
+
+    class Meta:
+        constraints = [
+            # Ensure the combination of site_url and username is unique for each user
+            models.UniqueConstraint(fields=['user', 'site_url', 'username'], name='unique_user_site_username')
+        ]
 
     def __str__(self):
         return f"Password for {self.user.email}"

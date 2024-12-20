@@ -6,6 +6,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .serializers import (
     LoginResponseSerializer,
+    PasswordDetailsSerializer,
     RegisterSerializer,
     PasswordSerializer,
     UserSerializer,
@@ -112,42 +113,75 @@ class LoginView(APIView):
 
 
 # widok dodawania nowego hasła
+
+# View for adding a new password
 class AddPasswordView(APIView):
+    @swagger_auto_schema(
+        request_body=PasswordDetailsSerializer,
+        responses={201: "Password saved successfully!", 400: "Validation error"},
+        manual_parameters=[
+            openapi.Parameter(
+                "email",  # Name of the parameter
+                openapi.IN_QUERY,  # Specify it's a query parameter
+                description="Email of the user",
+                type=openapi.TYPE_STRING,
+                required=True,  # Set to True if the parameter is mandatory
+            ),
+        ],
+        
+    )
     def post(self, request):
-        serializer = PasswordSerializer(data=request.data)
-        serializer.context["user"] = request.user
+        email = request.query_params.get("email") 
+        try:
+            user = User.objects.get(email=email)  
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User with the provided email does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        serializer = PasswordDetailsSerializer(data=request.data)
+        serializer.context["user"] = user  
+        
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(user=user)
             return Response(
                 {"message": "Password saved successfully!"},
                 status=status.HTTP_201_CREATED,
             )
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # widok odczytania zapisanych haseł
 
 class ListPasswordsView(APIView):
-
+    @swagger_auto_schema(
+        responses={200: PasswordSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter(
+                "email",  # Name of the parameter
+                openapi.IN_QUERY,  # Specify it's a query parameter
+                description="Email of the user",
+                type=openapi.TYPE_STRING,
+                required=True,  # Set to True if the parameter is mandatory
+            ),
+        ],
+    )
     def get(self, request):
-        # Retrieve email from query parameters
         email_from_query = request.query_params.get('email')
 
-        # Check if the email is provided in the query parameters
+ 
         if not email_from_query:
             return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Find the user with the given email
+
             user = User.objects.get(email=email_from_query)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Get the passwords associated with the found user
         passwords = Password.objects.filter(user=user)
         serializer = PasswordSerializer(passwords, many=True)
-
-        # Return the passwords as a JSON response
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

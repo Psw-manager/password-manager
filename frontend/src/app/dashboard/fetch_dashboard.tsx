@@ -1,8 +1,8 @@
 const API_BASE_URL = "http://localhost:8000/api";
 
 export type Password = {
-  password_id: string;
-  website_name: string;
+  id: string;
+  site_name: string;
   username: string;
   category: string;
 };
