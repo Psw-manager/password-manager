@@ -16,6 +16,8 @@ from .serializers import LoginSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
+import logging
+logger = logging.getLogger(__name__)
 
 def index(request):
     return HttpResponse("Welcome to the Password Manager!")
@@ -143,8 +145,9 @@ class GetPasswordsView(APIView):
 class GetPasswordByIdView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, password_id):
+        logger.debug(f"Request user: {request.user}, ID: {password_id}")
         try:
-            password = Password.objects.get(id=password_id, user=request.user) #pobieranie hasla powiazane z id i uzytkownikiem
+            password = Password.objects.get(id=password_id, user=request.user.id) #pobieranie hasla powiazane z id i uzytkownikiem
         except Password.DoesNotExist:
             return Response({"error": "Password not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = PasswordSerializer(password)
@@ -167,9 +170,9 @@ class UpdatePasswordView(APIView):
         except Password.DoesNotExist:
             return Response({"error": "Password not found"}, status=status.HTTP_404_NOT_FOUND)
         data = request.data #zmieniamy dane
-        password.site_name = data.get("site_name", password.site_name) #zaktualizowanie danych hasla
-        password.site_url = data.get("site_url", password.site_url)
-        password.encrypted_password = cipher_suite.encrypt(data.get("password", "").encode()) #zaszyfrowanie nowego hasla jesli zostalo podane i zapisanie w "encrypted_password"
+        password.website_name = data.get("website_name", password.website_name) #zaktualizowanie danych hasla
+        password.website_url = data.get("website_url", password.website_url)
+        password.password = cipher_suite.encrypt(data.get("password", "").encode()) #zaszyfrowanie nowego hasla jesli zostalo podane i zapisanie w "password"
         password.save()
         serializer = PasswordSerializer(password)
         return Response(serializer.data, status=status.HTTP_200_OK)

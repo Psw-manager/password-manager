@@ -1,13 +1,18 @@
 from django.db import models
 import pyotp
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+#from django.contrib.auth.models import Password
+import uuid
 
 class User(models.Model):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     def __str__(self):
         return self.username
@@ -22,17 +27,26 @@ class User(models.Model):
         return check_password(raw_password, self.password)
 
 class Password(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='passwords')
-    site_name = models.CharField(max_length=255)
-    site_url = models.URLField(blank=True, null=True)
-    encrypted_password = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['user']),
-        ]
+    SOCIAL_MEDIA = 'social_media'
+    ECOMMERCE = 'ecommerce'
+    WORK_PROFESSIONAL = 'work_professional'
+    OTHER = 'other'
 
-    def __str__(self):
-        return f"{self.site_name} for {self.user.username}"
+    CATEGORY_CHOICES = [
+        (SOCIAL_MEDIA, 'Social Media'),
+        (ECOMMERCE, 'E-commerce'),
+        (WORK_PROFESSIONAL, 'Work/Professional'),
+        (OTHER, 'Other'),
+    ]
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='passwords', db_constraint=False)
+    website_name = models.CharField(max_length=255)
+    website_url = models.URLField(blank=True, null=True)
+    password = models.TextField()
+    creation_date = models.DateTimeField(auto_now_add=True)
+    modification_date = models.DateTimeField(auto_now=True)
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default=OTHER,
+    )

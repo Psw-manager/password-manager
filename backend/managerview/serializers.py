@@ -24,25 +24,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 class PasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Password
-        fields = ['site_name', 'site_url', 'password']
+        fields = '__all__'
 
     def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
         password = validated_data.pop('password')
-        encrypted_password = cipher_suite.encrypt(password.encode())
-        validated_data['encrypted_password'] = encrypted_password
+        password = cipher_suite.encrypt(password.encode())
+        validated_data['password'] = password
         return super().create(validated_data)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        decrypted_password = cipher_suite.decrypt(instance.encrypted_password).decode()
+        decrypted_password = cipher_suite.decrypt(instance.password).decode()
         representation['password'] = decrypted_password
         return representation
     
     def update(self, instance, validated_data):
         password = validated_data.get('password', None)
         if password:
-            encrypted_password = cipher_suite.encrypt(password.encode())
-            validated_data['encrypted_password'] = encrypted_password
+            password = cipher_suite.encrypt(password.encode())
+            validated_data['password'] = password
         return super().update(instance, validated_data)
 
 class UserSerializer(serializers.ModelSerializer):

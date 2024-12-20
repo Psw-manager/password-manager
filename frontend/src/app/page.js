@@ -1,4 +1,16 @@
 import Image from "next/image";
+import PasswordList from "@/components/PasswordList";
+import TOTPGenerator from "@/components/TOTPGenerator";
+
+export default function Home() {
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Password Manager</h1>
+      <TOTPGenerator />
+      <PasswordList />
+    </div>
+  );
+}
 
 export default function Home() {
   return (
