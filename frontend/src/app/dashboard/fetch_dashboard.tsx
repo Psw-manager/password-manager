@@ -5,6 +5,11 @@ export type Password = {
   site_name: string;
   username: string;
   category: string;
+  site_url: string;
+  password: string;
+  creation_date: string;
+  modification_date: string;
+  notes: string;
 };
 
 export const fetchRefreshToken = async (refreshToken: string): Promise<string> => {
@@ -36,7 +41,7 @@ export const fetchPasswords = async (email: string | undefined | null): Promise<
     return []; 
   }
   try {
-    const response = await fetch(`http://localhost:8000/api/passwords/?email=${email}`);
+    const response = await fetch(`http://localhost:8000/api/passwords/details?email=${email}`);
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);
     }

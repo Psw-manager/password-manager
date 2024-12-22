@@ -20,11 +20,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { Eye, EyeOff } from "lucide-react";
 interface PasswordDetailsProps {
   title: string;
   data?: {
-    id?: string;  // Add an ID to identify the record
+    id?: string; // Add an ID to identify the record
     site_name?: string;
     username?: string;
     password?: string;
@@ -36,9 +37,28 @@ interface PasswordDetailsProps {
   };
   button_exit: string;
   isUpdateMode: boolean; // Whether it's for updating or creating
+  passwordId?: string;
 }
 
-export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: PasswordDetailsProps) => {
+interface Password {
+  id: string;
+  site_name: string;
+  username: string;
+  password: string;
+  site_url: string;
+  category: string;
+  creation_date: string;
+  modification_date: string;
+  notes: string;
+}
+
+export const PasswordDetails = ({
+  title,
+  data,
+  passwordId,
+  button_exit,
+  isUpdateMode,
+}: PasswordDetailsProps) => {
   const [formData, setFormData] = useState({
     site_name: data?.site_name || "",
     username: data?.username || "",
@@ -50,35 +70,21 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
     notes: data?.notes || "",
   });
 
-  useEffect(() => {
-    if (isUpdateMode && data?.id) {
-      // Fetch the existing password data if updating
-      fetch(`http://localhost:8000/api/passwords/?id=${data?.id}`)
-        .then((response) => response.json())
-        .then((fetchedData) => {
-          setFormData({
-            site_name: fetchedData.site_name,
-            username: fetchedData.username,
-            password: fetchedData.password,
-            site_url: fetchedData.site_url,
-            category: fetchedData.category,
-            creation_date: fetchedData.creation_date,
-            modification_date: fetchedData.modification_date,
-            notes: fetchedData.notes,
-          });
-        })
-        .catch((error) => console.error("Error fetching password data:", error));
-    }
-  }, [isUpdateMode, data?.id]);
-  
   const { data: session, status } = useSession();
-  const email = session?.user?.email; 
+  const email = session?.user?.email;
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
     const method = isUpdateMode ? "PUT" : "POST"; // PUT for update, POST for create
-    const endpoint = isUpdateMode ? `http://localhost:8000/api/passwords/?id=${data?.id}` : `http://localhost:8000/api/password/add/?email=${email}`; // Different endpoints for update and create
+    const endpoint = isUpdateMode
+      ? `http://localhost:8000/api/password/update/${passwordId}/?email=${email}`
+      : `http://localhost:8000/api/password/add/?email=${email}`; // Different endpoints for update and create
 
     fetch(endpoint, {
       method,
@@ -90,14 +96,25 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
       .then((response) => response.json())
       .then((responseData) => {
         console.log("Password saved successfully", responseData);
-        // You can add further handling here (like closing the dialog or showing a success message)
+        setFormData({
+          site_name: "",
+          username: "",
+          password: "",
+          site_url: "",
+          category: "",
+          creation_date: "",
+          modification_date: "",
+          notes: "",
+        });
       })
       .catch((error) => {
         console.error("Error saving password:", error);
       });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -138,13 +155,27 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
             <Label htmlFor="password" className="text-right">
               Password
             </Label>
-            <Input
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="col-span-3"
-              type="password"
-            />
+            <div className="relative col-span-3">
+              <Input
+                id="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full pr-10" // Added padding-right to make space for the icon
+                type={isPasswordVisible ? "text" : "password"} // Toggle between text and password
+              />
+              {/* Eye icon button for toggling visibility */}
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+              >
+                {isPasswordVisible ? (
+                  <Eye className="w-5 h-5" />
+                ) : (
+                  <EyeOff className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="site_url" className="text-right">
@@ -162,8 +193,13 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
               Category
             </Label>
             <div className="flex flex-col space-y-1.5">
-              <Select value={formData.category} onValueChange={(value) => setFormData((prevData) => ({ ...prevData, category: value }))}>
-                <SelectTrigger id="category" >
+              <Select
+                value={formData.category}
+                onValueChange={(value) =>
+                  setFormData((prevData) => ({ ...prevData, category: value }))
+                }
+              >
+                <SelectTrigger id="category">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -175,28 +211,33 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="creation_date" className="text-right">
-              Created at
-            </Label>
-            <Input
-              id="creation_date"
-              disabled
-              value={data?.creation_date || ""}
-              className="col-span-3 read-only"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4 mb-4">
-            <Label htmlFor="modification_date" className="text-right">
-              Last Modification Date
-            </Label>
-            <Input
-              id="modification_date"
-              disabled
-              value={data?.modification_date || ""}
-              className="col-span-3 read-only"
-            />
-          </div>
+          {isUpdateMode && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="creation_date" className="text-right">
+                Created at
+              </Label>
+              <Input
+                id="creation_date"
+                disabled
+                value={data?.creation_date || ""}
+                className="col-span-3 read-only"
+              />
+            </div>
+          )}
+
+          {isUpdateMode && (
+            <div className="grid grid-cols-4 items-center gap-4 mb-4">
+              <Label htmlFor="modification_date" className="text-right">
+                Last Modification Date
+              </Label>
+              <Input
+                id="modification_date"
+                disabled
+                value={data?.modification_date || ""}
+                className="col-span-3 read-only"
+              />
+            </div>
+          )}
           <Label htmlFor="notes" className="text-left">
             Notes
           </Label>
@@ -208,7 +249,9 @@ export const PasswordDetails = ({ title, data, button_exit, isUpdateMode }: Pass
           />
         </div>
         <DialogFooter>
-          <Button type="submit">{isUpdateMode ? "Update Password" : "Create Password"}</Button>
+          <Button type="submit">
+            {isUpdateMode ? "Update Password" : "Create Password"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

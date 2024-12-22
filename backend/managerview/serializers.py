@@ -83,7 +83,7 @@ class PasswordDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Password
-        fields = ['id', 'site_name', 'username', 'category', 'site_url', 'password', 'created_at', 'updated_at', 'notes']
+        fields = ['id', 'site_name', 'username', 'category', 'site_url', 'password', 'creation_date', 'modification_date', 'notes']
 
     # Create method to encrypt the password before saving it
     def create(self, validated_data):
