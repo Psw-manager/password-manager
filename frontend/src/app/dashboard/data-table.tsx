@@ -87,7 +87,13 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
+      columnVisibility: {
+        site_url: false, 
+        password: false, 
+        creation_date: false, 
+        modification_date: false, 
+        notes: false, 
+      },
       rowSelection,
     },
     initialState: {

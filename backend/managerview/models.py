@@ -30,8 +30,8 @@ class Password(models.Model):
     site_url = models.CharField(max_length=255)
     username = models.TextField(null=False, blank=False)
     password = models.TextField(null=False, blank=False)
-    created_at = models.TextField( null=True, blank=True)
-    updated_at = models.TextField(null=True, blank=True)
+    creation_date = models.TextField( null=True, blank=True)
+    modification_date = models.TextField(null=True, blank=True)
     notes = models.TextField(blank=True, null=True)
     category = models.CharField(
         max_length=20,
