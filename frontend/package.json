@@ -42,8 +42,8 @@
     "zod": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.9.0",
-    "@types/react": "^18.3.12",
+    "@types/node": "22.10.3",
+    "@types/react": "18.3.18",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "postcss": "^8.4.49",

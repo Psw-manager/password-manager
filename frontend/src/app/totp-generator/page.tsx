@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -19,6 +18,9 @@ export default function TotpGeneratorPage() {
   const [progress, setProgress] = useState(0);
   const [tokenPeriod, setTokenPeriod] = useState(30);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [secretKey, setSecretKey] = useState("");
+  const [digits, setDigits] = useState(6);
+  const [totp, setTotp] = useState("");
 
   const handleTokenPeriodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -27,13 +29,40 @@ export default function TotpGeneratorPage() {
     setProgress(0);
   };
 
+  const handleSecretKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSecretKey(e.target.value);
+  };
+
+  const handleDigitsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDigits(Number(e.target.value));
+  };
+
+  const generateTotp = () => {
+    if (!secretKey || digits <= 0 || tokenPeriod <= 0) {
+      toast.error("Please provide valid inputs for the TOTP generation.");
+      return;
+    }
+
+    // Simulate TOTP generation logic
+    const fakeTotp = `${Math.random().toString().slice(2, 2 + digits)}`.padStart(
+      digits,
+      "0"
+    );
+    setTotp(fakeTotp);
+
+    toast.success("Generated TOTP copied to your clipboard!");
+    navigator.clipboard.writeText(fakeTotp).catch((err) => {
+      toast.error("Failed to copy TOTP to clipboard.");
+      console.error("Clipboard error:", err);
+    });
+  };
+
   useEffect(() => {
     if (tokenPeriod <= 0) return;
 
     const timer = setInterval(() => {
       setTimeElapsed((prevTime) => {
         const newTime = prevTime + 1;
-
         const newProgress = Math.min((newTime / tokenPeriod) * 100, 100);
 
         setProgress(newProgress);
@@ -52,10 +81,7 @@ export default function TotpGeneratorPage() {
       <div className="flex justify-center items-center h-5/6">
         <Card className="w-3/5">
           <CardHeader>
-            <CardTitle>
-              Insert your values below{" "}
-            </CardTitle>
-            
+            <CardTitle>Insert your values below</CardTitle>
           </CardHeader>
           <CardContent>
             <form>
@@ -65,6 +91,8 @@ export default function TotpGeneratorPage() {
                   <Input
                     id="secret_key"
                     placeholder="Paste your secret key here"
+                    value={secretKey}
+                    onChange={handleSecretKeyChange}
                   />
                 </div>
 
@@ -72,7 +100,10 @@ export default function TotpGeneratorPage() {
                   <Label htmlFor="no_digits">NUMBER OF DIGITS</Label>
                   <Input
                     id="no_digits"
+                    type="number"
                     placeholder="Insert number of digits for the TOTP"
+                    value={digits}
+                    onChange={handleDigitsChange}
                   />
                 </div>
 
@@ -82,7 +113,9 @@ export default function TotpGeneratorPage() {
                   </Label>
                   <Input
                     id="token_period"
+                    type="number"
                     placeholder="Insert token period in seconds"
+                    value={tokenPeriod}
                     onChange={handleTokenPeriodChange}
                   />
                 </div>
@@ -92,19 +125,14 @@ export default function TotpGeneratorPage() {
             </form>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() =>
-                toast("Generated TOTP copied to your clipboard!", {
-                  action: {
-                    label: "X",
-                    onClick: () => console.log("exit"),
-                  },
-                })
-              }
-            >
+            <Button variant="outline" onClick={generateTotp}>
               Generate
             </Button>
+            {totp && (
+              <div className="text-lg font-bold">
+                TOTP: <span className="text-blue-600">{totp}</span>
+              </div>
+            )}
           </CardFooter>
         </Card>
       </div>
