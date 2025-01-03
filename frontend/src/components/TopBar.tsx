@@ -48,19 +48,19 @@ export const TopBar = () => {
         </Link>
         <Link
           href="/dashboard"
-          className="text-foreground transition-colors hover:text-foreground text-xl"
+          className="text-foreground transition-colors hover:text-gray-400 text-xl"
         >
           Dashboard
         </Link>
         <Link
           href="/password-generator"
-          className="text-muted-foreground transition-colors hover:text-foreground text-xl whitespace-nowrap"
+          className="text-foreground transition-colors hover:text-gray-400 text-xl whitespace-nowrap"
         >
           Generate Password
         </Link>
         <Link
           href="/totp-generator"
-          className="text-muted-foreground transition-colors hover:text-foreground text-xl whitespace-nowrap"
+          className="text-foreground transition-colors hover:text-gray-400 text-xl whitespace-nowrap"
         >
           Generate TOTP
         </Link>
@@ -86,13 +86,13 @@ export const TopBar = () => {
             </Link>
             <Link
               href="/password-generator"
-              className="text-muted-foreground hover:text-foreground"
+              className="hover:text-foreground"
             >
               Generate Password
             </Link>
             <Link
               href="/totp-generator"
-              className="text-muted-foreground hover:text-foreground "
+              className="hover:text-foreground "
             >
               Generate TOTP
             </Link>

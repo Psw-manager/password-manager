@@ -73,6 +73,7 @@ export const PasswordDetails = ({
   const { data: session, status } = useSession();
   const email = session?.user?.email;
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -84,7 +85,7 @@ export const PasswordDetails = ({
     const method = isUpdateMode ? "PUT" : "POST"; // PUT for update, POST for create
     const endpoint = isUpdateMode
       ? `http://localhost:8000/api/password/update/${passwordId}/?email=${email}`
-      : `http://localhost:8000/api/password/add/?email=${email}`; // Different endpoints for update and create
+      : `http://localhost:8000/api/password/add/?email=${email}`; 
 
     fetch(endpoint, {
       method,
@@ -106,6 +107,7 @@ export const PasswordDetails = ({
           modification_date: "",
           notes: "",
         });
+        window.location.reload();
       })
       .catch((error) => {
         console.error("Error saving password:", error);
@@ -149,6 +151,7 @@ export const PasswordDetails = ({
               value={formData.username}
               onChange={handleChange}
               className="col-span-3"
+              required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -160,6 +163,7 @@ export const PasswordDetails = ({
                 id="password"
                 value={formData.password}
                 onChange={handleChange}
+                required
                 className="w-full pr-10" // Added padding-right to make space for the icon
                 type={isPasswordVisible ? "text" : "password"} // Toggle between text and password
               />

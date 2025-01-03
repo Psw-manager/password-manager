@@ -7,6 +7,7 @@ import { TopBar } from "@/components/TopBar";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { PasswordProvider } from "./dashboard/password_provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <PasswordProvider>
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
@@ -48,6 +50,7 @@ export default function RootLayout({
             </div>
           </SessionProvider>
         </NextThemesProvider>
+        </PasswordProvider>
         <Toaster />
       </body>
     </html>
