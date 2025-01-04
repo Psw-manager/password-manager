@@ -43,7 +43,6 @@ export default function TotpGeneratorPage() {
       return;
     }
 
-    // Simulate TOTP generation logic
     const fakeTotp = `${Math.random().toString().slice(2, 2 + digits)}`.padStart(
       digits,
       "0"
@@ -55,6 +54,10 @@ export default function TotpGeneratorPage() {
       toast.error("Failed to copy TOTP to clipboard.");
       console.error("Clipboard error:", err);
     });
+
+    // Reset progress
+    setTimeElapsed(0);
+    setProgress(0);
   };
 
   useEffect(() => {
@@ -66,15 +69,18 @@ export default function TotpGeneratorPage() {
         const newProgress = Math.min((newTime / tokenPeriod) * 100, 100);
 
         setProgress(newProgress);
+
         if (newProgress >= 100) {
-          clearInterval(timer);
+          generateTotp();
+          return 0;
         }
 
         return newTime;
       });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, [tokenPeriod]);
+  }, [tokenPeriod, secretKey, digits]);
 
   return (
     <>
@@ -124,9 +130,9 @@ export default function TotpGeneratorPage() {
               </div>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex justify-between items-center">
             <Button variant="outline" onClick={generateTotp}>
-              Generate
+              Generate TOTP
             </Button>
             {totp && (
               <div className="text-lg font-bold">

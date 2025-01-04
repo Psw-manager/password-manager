@@ -15,7 +15,7 @@ from .serializers import (
 from .models import User, Password
 from django.contrib.auth import authenticate
 import pyotp
-from django.contrib.auth.hashers import check_password  # wbudowana funkcja
+from django.contrib.auth.hashers import check_password  #wbudowana funkcja
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views import View
@@ -38,7 +38,7 @@ def index(request):
     return HttpResponse("Welcome to the Password Manager!")
 
 
-# konfiguracja Swagger i Redoc
+#konfiguracja Swagger i Redoc
 schema_view = get_schema_view(
     openapi.Info(
         title="My API",
@@ -52,7 +52,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-# widok rejestracji użytkownika
+#widok rejestracji użytkownika
 from drf_yasg.utils import swagger_auto_schema
 
 
@@ -74,7 +74,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# widok logowania użytkownika
+#widok logowania użytkownika
 class LoginView(APIView):
     permissions_classes = [AllowAny]
     @swagger_auto_schema(
@@ -120,23 +120,22 @@ class UpdatePasswordView(APIView):
         responses={200: "Password updated successfully!", 400: "Validation error", 404: "Password not found"},
         manual_parameters=[
             openapi.Parameter(
-                "email",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "email",
+                openapi.IN_QUERY,
                 description="Email of the user",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
             openapi.Parameter(
-                "password_id",  # Name of the parameter to identify the password to be updated
-                openapi.IN_PATH,  # Specify it's a path parameter
+                "password_id",
+                openapi.IN_PATH,
                 description="ID of the password to be updated",
-                type=openapi.TYPE_STRING,  # Assuming ID is a string
+                type=openapi.TYPE_STRING,
                 required=True,
             ),
         ],
     )
     def put(self, request, password_id):
-        # Retrieve email from query parameters
         email = request.query_params.get("email")
         if not email:
             return Response(
@@ -144,7 +143,6 @@ class UpdatePasswordView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Attempt to get the user based on the email
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -153,7 +151,6 @@ class UpdatePasswordView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Attempt to retrieve the password object by its ID
         try:
             password = Password.objects.get(id=password_id, user=user)
         except Password.DoesNotExist:
@@ -162,16 +159,12 @@ class UpdatePasswordView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Deserialize the incoming data and update the password
         serializer = PasswordDetailsSerializer(password, data=request.data, partial=True)
-        serializer.context["user"] = user  # Include user context if needed for validation
+        serializer.context["user"] = user
 
         if serializer.is_valid():
-            # Add timestamps (or any other fields you may want to update)
-            # You can also rely on model fields like auto_now or auto_now_add if appropriate
             updated_at = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
             serializer.validated_data['modification_date'] = updated_at
-            # Save the updated password record
             serializer.save()
 
             return Response(
@@ -181,18 +174,17 @@ class UpdatePasswordView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-# View for adding a new password
 class AddPasswordView(APIView):
     @swagger_auto_schema(
         request_body=PasswordDetailsSerializer,
         responses={201: "Password saved successfully!", 400: "Validation error"},
         manual_parameters=[
             openapi.Parameter(
-                "email",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "email",
+                openapi.IN_QUERY,
                 description="Email of the user",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
         ],
         
@@ -221,18 +213,17 @@ class AddPasswordView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# widok odczytania zapisanych haseł
 
 class ListPasswordsView(APIView):
     @swagger_auto_schema(
         responses={200: PasswordSerializer(many=True)},
         manual_parameters=[
             openapi.Parameter(
-                "email",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "email",
+                openapi.IN_QUERY,
                 description="Email of the user",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
         ],
     )
@@ -258,11 +249,11 @@ class ListPasswordsDetailsView(APIView):
         responses={200: PasswordDetailsSerializer(many=True)},
         manual_parameters=[
             openapi.Parameter(
-                "email",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "email",
+                openapi.IN_QUERY,
                 description="Email of the user",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
         ],
     )
@@ -322,11 +313,8 @@ class GetAllUsersView(APIView):
 
     @swagger_auto_schema(responses={200: UserSerializer(many=True)})
     def get(self, request):
-        # Query all users
         users = User.objects.all()
-        # Serialize the user data
         serializer = UserSerializer(users, many=True)
-        # Return a response with the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -335,18 +323,18 @@ class ListPasswordDetailView(APIView):
         responses={200: PasswordDetailsSerializer},
         manual_parameters=[
             openapi.Parameter(
-                "email",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "email",
+                openapi.IN_QUERY,
                 description="Email of the user",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
             openapi.Parameter(
-                "id",  # Name of the parameter
-                openapi.IN_QUERY,  # Specify it's a query parameter
+                "id",
+                openapi.IN_QUERY,
                 description="ID of the password record",
                 type=openapi.TYPE_STRING,
-                required=True,  # Set to True if the parameter is mandatory
+                required=True,
             ),
         ],
     )
@@ -354,22 +342,18 @@ class ListPasswordDetailView(APIView):
         email_from_query = request.query_params.get('email')
         password_id_from_query = request.query_params.get('id')
 
-        # Check if both email and password ID are provided
         if not email_from_query or not password_id_from_query:
             return Response({"error": "Email and password ID are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Get the user by email
             user = User.objects.get(email=email_from_query)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            # Get the password by user and password ID
             password = Password.objects.get(user=user, id=password_id_from_query)
         except Password.DoesNotExist:
             return Response({"error": "Password not found for this user"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Serialize and return the password data
         serializer = PasswordDetailsSerializer(password)
         return Response(serializer.data, status=status.HTTP_200_OK)

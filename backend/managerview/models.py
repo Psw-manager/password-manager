@@ -42,7 +42,6 @@ class Password(models.Model):
 
     class Meta:
         constraints = [
-            # Ensure the combination of site_url and username is unique for each user
             models.UniqueConstraint(fields=['user', 'site_url', 'username'], name='unique_user_site_username')
         ]
 
