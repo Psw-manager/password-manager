@@ -12,6 +12,7 @@ from .views import (
     AddPasswordView, 
     ListPasswordsView,
     ValidateTOTPView,
+    DeletePasswordView,
 )
 
 urlpatterns = [
@@ -21,10 +22,10 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     path('password/add/', AddPasswordView.as_view(), name='add-password'),
-     path('password/update/<str:password_id>/', UpdatePasswordView.as_view(), name='update-password'),
+    path('password/update/<str:password_id>/', UpdatePasswordView.as_view(), name='update-password'),
     path('passwords/details', ListPasswordsDetailsView.as_view(), name='list-passwords-details'),
     path('validate-totp/', ValidateTOTPView.as_view(), name='validate-totp'),
-     path('users/', GetAllUsersView.as_view(), name='get_all_users'), 
-     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
-     
+    path('users/', GetAllUsersView.as_view(), name='get_all_users'), 
+    path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path("passwords/<int:id>/delete/", DeletePasswordView.as_view(), name="delete-password"),
 ]

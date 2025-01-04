@@ -112,8 +112,6 @@ class LoginView(APIView):
             )
 
 
-
-
 class UpdatePasswordView(APIView):
     @swagger_auto_schema(
         request_body=PasswordDetailsSerializer,
@@ -357,3 +355,58 @@ class ListPasswordDetailView(APIView):
 
         serializer = PasswordDetailsSerializer(password)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DeletePasswordView(APIView):
+    @swagger_auto_schema(
+        responses={
+            204: "Password deleted successfully!",
+            400: "Bad Request",
+            404: "Password not found",
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "email",
+                openapi.IN_QUERY,
+                description="Email of the user",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "id",
+                openapi.IN_PATH,
+                description="ID of the password to be deleted",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+        ],
+    )
+    def delete(self, request, id):
+        email = request.query_params.get("email")
+        if not email:
+            return Response(
+                {"error": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User with the provided email does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            password = Password.objects.get(id=id, user=user)
+        except Password.DoesNotExist:
+            return Response(
+                {"error": "Password not found for this user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        password.delete()
+        return Response(
+            {"message": "Password deleted successfully!"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
