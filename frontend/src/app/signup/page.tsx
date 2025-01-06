@@ -19,12 +19,12 @@ import Link from "next/link";
 import axios from "axios"; 
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
 
 
 const FormSchema = z.object({
-  email: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  email: z.string().min(5, {
+    message: "Username must be at least 5 characters.",
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
@@ -66,7 +66,7 @@ export default function SignupPage() {
         },
       })
       form.reset();
-      //router.push('/login');  
+      
 
   
     } catch (error: any) {
@@ -133,7 +133,7 @@ export default function SignupPage() {
                       <FormItem>
                         <FormLabel className="text-base">Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your email..." {...field} />
+                          <Input placeholder="Enter your email..." {...field} required/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -147,7 +147,7 @@ export default function SignupPage() {
                       <FormItem>
                         <FormLabel className="text-base">Password</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your password..." type="password" {...field} />
+                          <Input placeholder="Enter your password..." type="password" {...field} required/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

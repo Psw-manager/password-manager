@@ -23,11 +23,11 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 const FormSchema = z.object({
-  email: z.string().min(2, {
-    message: "Email must be at least 2 characters.",
+  email: z.string().min(5, {
+    message: "Email must be at least 5 characters.",
   }),
-  password: z.string().min(3, {
-    message: "Password must be at least 3 characters.",
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
   }),
 });
 
@@ -123,7 +123,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel className="text-base">Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your email..." {...field} />
+                          <Input placeholder="Enter your email..." type="email" {...field} required/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -141,6 +141,7 @@ export default function Home() {
                             placeholder="Enter your password..."
                             type="password"
                             {...field}
+                            required
                           />
                         </FormControl>
                         <FormMessage />

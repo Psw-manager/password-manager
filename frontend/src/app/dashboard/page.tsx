@@ -4,10 +4,11 @@ import { Password, columns } from "./columns"
 import { DataTable } from "./data-table"
 import { useEffect, useState } from "react";
 import { fetchPasswords } from "./fetch_dashboard";
+import { usePasswords } from "./password_provider";
 
 export default function DemoPage() {
   const { data: session, status } = useSession();
-  const [passwords, setPasswords] = useState<Password[]>([]);
+  const { passwords, setPasswords } = usePasswords();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
