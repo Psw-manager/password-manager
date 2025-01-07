@@ -15,6 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PasswordDetails } from "@/components/PasswordDetails";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { MdDeleteForever } from "react-icons/md";
+import * as React from "react";
+import { useSession } from "next-auth/react";
 
 
 export type Password = {
@@ -28,6 +32,8 @@ export type Password = {
   modification_date: string;
   notes: string;
 };
+
+
 
 export const columns: ColumnDef<Password>[] = [
   {
@@ -97,8 +103,34 @@ export const columns: ColumnDef<Password>[] = [
     cell: ({ row }) => {
       const passwordId = row.original.id;
       const passwordData = row.original; 
+      const [isDeleting, setIsDeleting] = React.useState(false);
+      const { data: session, status } = useSession();
+      const email = session?.user?.email;
+      
+
+      const handleDelete = async () => {
+        try {
+          if(email){
+            
+          setIsDeleting(true);
+          await fetch(`http://localhost:8000/api/delete-password?email=${email}&id=${passwordId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          setIsDeleting(false);
+          window.location.reload();
+        }
+        } catch (error) {
+          setIsDeleting(false);
+          alert("Failed to delete password.");
+          console.error("Failed to delete password:", error);
+        }
+      };
 
       return (
+        <div className="flex items-center justify-end gap-10">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -106,8 +138,39 @@ export const columns: ColumnDef<Password>[] = [
               <MoreHorizontal />
             </Button>
           </DialogTrigger>
-          <PasswordDetails title="Password details" data={passwordData} passwordId={passwordId} button_exit="Save changes" isUpdateMode={true} />
+          <PasswordDetails
+            title="Password details"
+            data={passwordData}
+            passwordId={passwordId}
+            button_exit="Save changes"
+            isUpdateMode={true}
+          />
         </Dialog>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" className="mr-4">
+              <MdDeleteForever className="text-2xl" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently remove your selected passwords.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} 
+                  className="bg-destructive hover:bg-red-800"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>      
       );
     },
   },

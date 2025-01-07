@@ -108,6 +108,7 @@ export const PasswordDetails = ({
           notes: "",
         });
         window.location.reload();
+        
       })
       .catch((error) => {
         console.error("Error saving password:", error);
@@ -140,6 +141,7 @@ export const PasswordDetails = ({
               value={formData.site_name}
               onChange={handleChange}
               className="col-span-3"
+              required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -190,6 +192,7 @@ export const PasswordDetails = ({
               value={formData.site_url}
               onChange={handleChange}
               className="col-span-3"
+              required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -199,6 +202,7 @@ export const PasswordDetails = ({
             <div className="flex flex-col space-y-1.5">
               <Select
                 value={formData.category}
+                required
                 onValueChange={(value) =>
                   setFormData((prevData) => ({ ...prevData, category: value }))
                 }

@@ -75,25 +75,34 @@ class PasswordSerializer(serializers.ModelSerializer):
         return representation
     
 
-
 class PasswordDetailsSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = Password
         fields = ['id', 'site_name', 'username', 'category', 'site_url', 'password', 'creation_date', 'modification_date', 'notes']
 
     def create(self, validated_data):
+        # Ensure category is set to 'Other' if not provided
+        if 'category' not in validated_data:
+            validated_data['category'] = Category.OTHER  # Default to 'Other' as a valid choice
+        
         plaintext_password = validated_data.pop('password')
         encrypted_password = cipher_suite.encrypt(plaintext_password.encode()).decode()
         validated_data['password'] = encrypted_password
+        
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        # Ensure category is set to 'Other' if not provided
+        if 'category' not in validated_data:
+            validated_data['category'] = Category.OTHER  # Default to 'Other' as a valid choice
+        
         if 'password' in validated_data:
             plaintext_password = validated_data.pop('password')
             encrypted_password = cipher_suite.encrypt(plaintext_password.encode()).decode()
             validated_data['password'] = encrypted_password
+        
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -104,6 +113,7 @@ class PasswordDetailsSerializer(serializers.ModelSerializer):
         except Exception:
             representation['password'] = "Decryption failed"
         return representation
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

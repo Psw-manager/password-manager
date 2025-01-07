@@ -123,25 +123,6 @@ export function DataTable<TData, TValue>({
             </DialogTrigger>
             <PasswordDetails title="Add new password" button_exit="Add" isUpdateMode={false} />
           </Dialog>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <MdDeleteForever className="text-2xl" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently remove your selected passwords.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive hover:bg-red-800">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </div>
       <div className="rounded-md border">
@@ -189,7 +170,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Loading...
                 </TableCell>
               </TableRow>
             )}

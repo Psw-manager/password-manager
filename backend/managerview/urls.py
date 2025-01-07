@@ -27,5 +27,5 @@ urlpatterns = [
     path('validate-totp/', ValidateTOTPView.as_view(), name='validate-totp'),
     path('users/', GetAllUsersView.as_view(), name='get_all_users'), 
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
-    path("passwords/<int:id>/delete/", DeletePasswordView.as_view(), name="delete-password"),
+    path('delete-password', DeletePasswordView.as_view(), name='delete-password'),
 ]

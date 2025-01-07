@@ -359,37 +359,36 @@ class ListPasswordDetailView(APIView):
 
 class DeletePasswordView(APIView):
     @swagger_auto_schema(
-        responses={
-            204: "Password deleted successfully!",
-            400: "Bad Request",
-            404: "Password not found",
-        },
+        responses={200: "Password deleted successfully!", 404: "Password or User not found", 400: "Validation error"},
         manual_parameters=[
             openapi.Parameter(
                 "email",
                 openapi.IN_QUERY,
-                description="Email of the user",
+                description="Email of the user whose password is to be deleted",
                 type=openapi.TYPE_STRING,
                 required=True,
             ),
             openapi.Parameter(
                 "id",
-                openapi.IN_PATH,
-                description="ID of the password to be deleted",
-                type=openapi.TYPE_STRING,
+                openapi.IN_QUERY,
+                description="ID of the password entry to be deleted",
+                type=openapi.TYPE_INTEGER,
                 required=True,
             ),
         ],
     )
-    def delete(self, request, id):
+    def delete(self, request):
         email = request.query_params.get("email")
-        if not email:
+        password_id = request.query_params.get("id")
+        
+        if not email or not password_id:
             return Response(
-                {"error": "Email is required."},
+                {"error": "Both email and password ID are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
+            # First, find the user by the provided email
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
@@ -398,15 +397,18 @@ class DeletePasswordView(APIView):
             )
 
         try:
-            password = Password.objects.get(id=id, user=user)
+          
+            password_entry = Password.objects.get(id=password_id, user=user)
         except Password.DoesNotExist:
             return Response(
-                {"error": "Password not found for this user."},
+                {"error": "Password with the provided ID for the given user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        password.delete()
+        # If password exists, delete it
+        password_entry.delete()
+
         return Response(
-            {"message": "Password deleted successfully!"},
-            status=status.HTTP_204_NO_CONTENT,
+            {"message": "Password deleted successfully."},
+            status=status.HTTP_200_OK,
         )
